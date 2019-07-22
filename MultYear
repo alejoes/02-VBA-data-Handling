@@ -1,0 +1,97 @@
+Attribute VB_Name = "Module1"
+Sub HW():
+Dim i, j As Integer
+Dim lastrow, StVol As Double
+Dim workS As Worksheet
+Dim OpeningV, ClosingV, porc As Double
+Dim tickl, tickv, tickvol As String
+
+For Each workS In ActiveWorkbook.Sheets          'this FOR goes from worksheet to worksheet
+    workS.Activate                                               'this instruction activates the present worksheet
+    Cells(1, 9).Value = "Ticker"                             'simple formatting and names assignment
+    Cells(1, 10).Value = "Yearly Change"
+    Cells(1, 11).Value = "Percent Change"
+    Cells(1, 12).Value = "Total Stock Vol"
+    Cells(2, 15).Value = "Greatest % Increase"
+    Cells(3, 15).Value = "Greatest % Decrease"
+    Cells(4, 15).Value = "Greatest Total Volume"
+    Cells(1, 16).Value = "Ticker"
+    Cells(1, 17).Value = "Value"
+    Columns("O").ColumnWidth = 19
+    Columns("J:L").ColumnWidth = 15
+    Columns("Q").ColumnWidth = 15
+    Range(Cells(2, 17), Cells(3, 17)).NumberFormat = "0.00%"
+    
+    lastrow = ActiveSheet.UsedRange.Rows.Count
+    StVol = 0
+    j = 2
+    For i = 2 To lastrow                                                                 'this FOR goes row by row comparing one to next one and seeing if they match
+        If Cells(i, 1).Value = Cells(i + 1, 1).Value Then                     'if they match then they will add them together in the variable StVol
+            If StVol = 0 Then                                                             'this is to be able to add the 1st number of the ticker being evaluated
+                OpeningV = Cells(i, 3).Value
+                StVol = Cells(i, 7) + Cells(i + 1, 7)
+            Else:                                                                                 'if not the 1st number of the ticker being evaluated, then
+                StVol = StVol + Cells(i + 1, 7)
+            End If
+        Else:                                                                                     'When they do not match anymore, I assign the Total Volume of the ticker
+            ClosingV = Cells(i, 6).Value                                              'to the appropiate cell
+            Cells(j, 9).Value = Cells(i, 1).Value
+            Cells(j, 12).Value = StVol
+            svol = StVol
+            Cells(j, 10).Value = ClosingV - OpeningV
+            Call Percentage(OpeningV, ClosingV, j, perc)
+            Call Greatest(gval, lval, gvol, tickv, tickl, svol, j, perc, tickvol) '
+            StVol = 0
+            j = j + 1
+        End If
+    Next i
+    Cells(2, 17).Value = gval            'asigning values to the excel cells
+    Cells(2, 16).Value = tickv
+    Cells(3, 17).Value = lval
+    Cells(3, 16).Value = tickl
+    Cells(4, 17).Value = gvol
+    Cells(4, 16).Value = tickvol
+    gval = 0                                    'initializing varables before going to the next worksheet
+    lval = 0
+    gvol = 0
+Next workS
+End Sub
+Function Percentage(a, b, j, res)              'this function calculates the % change and formats the cells with color
+If a = 0 And b > 0 Then                          'worth mentioning it considers the possibility of ticker opening & closing values
+    res = 1                                               'of 0
+    Cells(j, 10).Interior.ColorIndex = 4
+    Cells(j, 11).Value = res
+    Cells(j, 11).NumberFormat = "0.00%"
+ElseIf a = 0 And b < 0 Then
+    res = -1
+    Cells(j, 10).Interior.ColorIndex = 3
+    Cells(j, 11).Value = res
+    Cells(j, 11).NumberFormat = "0.00%"
+ElseIf a = 0 And b = 0 Then
+    res = 0
+Else:
+    res = (b - a) / a
+    Cells(j, 11).Value = res
+    Cells(j, 11).NumberFormat = "0.00%"
+        If Cells(j, 10).Value > 0 Then
+            Cells(j, 10).Interior.ColorIndex = 4
+        Else:
+            Cells(j, 10).Interior.ColorIndex = 3
+        End If
+End If
+End Function
+Function Greatest(g, l, gv, tv, tl, V, i, porc, tvol)  'this function calculates the greatest & lowest values with their
+If porc > g Then                                                 'respective Ticker
+    g = porc
+    tv = Cells(i, 9).Value
+End If
+If porc < l Then
+    l = porc
+    tl = Cells(i, 9).Value
+End If
+If V > gv Then
+    gv = V
+    tvol = Cells(i, 9).Value
+End If
+End Function
+
