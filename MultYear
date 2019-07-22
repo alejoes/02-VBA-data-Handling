@@ -6,7 +6,7 @@ Dim workS As Worksheet
 Dim OpeningV, ClosingV, porc As Double
 Dim tickl, tickv, tickvol As String
 
-For Each workS In ActiveWorkbook.Sheets          'this FOR goes from worksheet to worksheet
+For Each workS In ActiveWorkbook.Sheets          'this  FOR goes from worksheet to worksheet
     workS.Activate                                               'this instruction activates the present worksheet
     Cells(1, 9).Value = "Ticker"                             'simple formatting and names assignment
     Cells(1, 10).Value = "Yearly Change"
